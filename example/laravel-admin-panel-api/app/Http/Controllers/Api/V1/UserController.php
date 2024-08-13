@@ -12,10 +12,6 @@ use App\Models\User;
 use App\Http\Requests\User\UserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
-use App\Actions\User\GetUsersAction;
-use App\Actions\User\CreateUserAction;
-use App\Actions\User\UpdateUserAction;
-use App\Actions\User\DeleteUserAction;
 
 /**
  * @group User Management
@@ -155,9 +151,8 @@ class UserController extends Controller
      * )
      */
 
-    public function index(GetUsersAction $action): ResourceCollection
+    public function index(): ResourceCollection
     {
-        return UserResource::collection($action->handle());
     }
 
     /**
@@ -294,20 +289,8 @@ class UserController extends Controller
      * )
      */
 
-    public function store(UserRequest $request, CreateUserAction $action): JsonResponse
+    public function store(UserRequest $request): JsonResponse
     {
-        Gate::authorize("create", User::class);
-
-        if ($user = $action->handle($request->validated()))
-            return response()->json([
-                "success" => true,
-                "message" => "User created successfully",
-                "data" => $user->toArray()
-            ], 201);
-        else
-            return response()->json([
-                "success" => false
-            ], 500);
     }
 
     /**
@@ -389,9 +372,6 @@ class UserController extends Controller
 
     public function show(User $user): UserResource
     {
-        Gate::authorize("view", $user);
-
-        return new UserResource($user);
     }
 
     /**
@@ -562,22 +542,8 @@ class UserController extends Controller
      * )
      */
 
-    public function update(UpdateUserRequest $request, User $user, UpdateUserAction $action): JsonResponse|Response|ResponseFactory
+    public function update(UpdateUserRequest $request, User $user): JsonResponse|Response|ResponseFactory
     {
-        Gate::authorize("update", $user);
-
-        if ($user = $action->handle($user, $request->validated()))
-            return response()->json([
-                "success" => true,
-                "message" => "User updated successfully!",
-                "data" => []
-            ], 204);
-        else
-            return response()->json([
-                "success" => false,
-                "message" => "something wrong!",
-                "data" => null
-            ], 500);
     }
 
     /**
@@ -667,19 +633,7 @@ class UserController extends Controller
      * )
      */
 
-    public function destroy(User $user, DeleteUserAction $action): JsonResponse
+    public function destroy(User $user): JsonResponse
     {
-        Gate::authorize("delete", $user);
-
-        if ($user = $action->handle($user))
-            return response()->json([
-                "success" => true,
-                "message" => "User deleted successfully!"
-            ], 204);
-        else
-            return response()->json([
-                "success" => false,
-                "message" => "Something wrong!"
-            ], 500);
     }
 }

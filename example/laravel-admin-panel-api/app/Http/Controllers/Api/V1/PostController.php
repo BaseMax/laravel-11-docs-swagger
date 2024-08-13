@@ -10,10 +10,6 @@ use App\Models\User;
 use App\Models\Post;
 use App\Http\Requests\Post\PostRequest;
 use App\Http\Resources\PostResource;
-use App\Actions\Post\GetPostsAction;
-use App\Actions\Post\CreatePostAction;
-use App\Actions\Post\UpdatePostAction;
-use App\Actions\Post\DeletePostAction;
 use App\Jobs\NewPostSendMailJob;
 
 /**
@@ -101,11 +97,8 @@ class PostController extends Controller
      * )
      */
 
-    public function index(GetPostsAction $action): ResourceCollection
+    public function index(): ResourceCollection
     {
-        Gate::authorize("viewAny", Post::class);
-
-        return PostResource::collection($action->handle());
     }
 
     /**
@@ -232,31 +225,9 @@ class PostController extends Controller
      * )
      */
 
-    public function store(PostRequest $request, CreatePostAction $action): JsonResponse
+    public function store(PostRequest $request): JsonResponse
     {
-        Gate::authorize("create", Post::class);
 
-        $data = $request->validated();
-
-        if ($request->file("cover"))
-            $data['cover'] = $request->file("cover")->store("covers");
-
-        if ($post = $action->handle($data)) {
-            User::whereHas("role", fn($role) => $role->where('name', '!=', 'admin'))->chunkMap(function ($user) use ($post) {
-
-                NewPostSendMailJob::dispatch($post, $user);
-
-            });
-            return response()->json([
-                "success" => true,
-                "message" => "Post created successfully",
-                "data" => $post
-            ], 201);
-        } else
-            return response()->json([
-                "success" => false,
-                "message" => "something wrong"
-            ], 500);
     }
 
     /**
@@ -330,9 +301,7 @@ class PostController extends Controller
 
     public function show(Post $post): PostResource
     {
-        Gate::authorize("view", $post);
 
-        return new PostResource($post);
     }
 
     /**
@@ -482,24 +451,9 @@ class PostController extends Controller
      * )
      */
 
-    public function update(PostRequest $request, Post $post, UpdatePostAction $action)
+    public function update(PostRequest $request, Post $post)
     {
-        // Gate::authorize("update", $post);
 
-        $data = $request->validated();
-
-        if ($action->handle($post, $data))
-            return response()->json([
-                "success" => true,
-                "message" => "Post updated ssuccessfully",
-                "data" => true
-            ], 204);
-        else
-            return response()->json([
-                "success" => false,
-                "message" => "something wrong",
-                "data" => null
-            ], 500);
     }
 
     /**
@@ -589,13 +543,8 @@ class PostController extends Controller
      * )
      */
 
-    public function destroy(Post $post, DeletePostAction $action)
+    public function destroy(Post $post)
     {
-        Gate::authorize("delete", $post);
-
-        if ($action->handle($post))
-            return response()->json([], 204);
-        else
-            return response()->json([], 500);
+        
     }
 }

@@ -6,13 +6,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Http\Requests\User\UserRequest;
 use App\Http\Requests\User\LoginRequest;
-use App\Http\Resources\UserResource;
-use App\Actions\User\CreateUserAction;
-use App\Events\UserRegistered;
-use App\Jobs\GenerateSiteMapJob;
 
 /**
  * @group Authenticate
@@ -160,41 +155,9 @@ class AuthController extends Controller
      * )
      */
 
-    public function register(UserRequest $request, CreateUserAction $action): JsonResponse
+    public function register(UserRequest $request): JsonResponse
     {
-        $data = $request->validated();
 
-        $data['password'] = \Hash::make($data['password']);
-
-        $data['role_id'] = 2;
-
-        try {
-            $user = $action->handle($data);
-
-            $token = $user->createToken($user->name)->plainTextToken;
-
-            UserRegistered::dispatch($user);
-
-            GenerateSiteMapJob::dispatch();
-
-            return response()->json([
-                "success" => true,
-                "message" => "User registered successfully!",
-                "data" => [
-                    "token" => $token,
-                    "user" => new UserResource($user)
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-
-            return response()->json([
-                "success" => false,
-                "message" => $e->getMessage(),
-                "data" => null
-            ], 500);
-
-        }
     }
 
     /**
@@ -313,25 +276,7 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        $data = $request->validated();
 
-        $user = User::query()->where("email", $data["email"])->first();
-
-        if (!$user || Hash::check($data["password"], $user->password))
-            return response()->json([
-                "success" => false,
-                "message" => "Invalid credential!"
-            ]);
-
-        $token = $user->createToken($user->name)->plainTextToken;
-
-        return response()->json([
-            "success" => true,
-            "message" => "User login successfully!",
-            "data" => [
-                "token" => $token
-            ]
-        ]);
     }
 
     /**
@@ -383,11 +328,6 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        auth()->user()->tokens()->delete();
 
-        return response()->json([
-            "success" => true,
-            "message" => "logged out"
-        ]);
     }
 }

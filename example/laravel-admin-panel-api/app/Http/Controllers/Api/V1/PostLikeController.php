@@ -68,23 +68,7 @@ class PostLikeController extends Controller
      */
     public function store_like(Post $post): JsonResponse
     {
-        try {
-            $user = auth()->user();
 
-            $post->likes()->attach($user?->id);
-
-            $post->save();
-
-            return response()->json([
-                "success" => true,
-                "message" => "Post liked!"
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                "success" => false,
-                "message" => $e->getMessage()
-            ], 500);
-        }
     }
 
     /**
@@ -140,26 +124,7 @@ class PostLikeController extends Controller
 
     public function destroy_like(Post $post): JsonResponse
     {
-        try {
-            $user = auth()->user();
 
-            $post->likes()->detach($user?->id);
-
-            $post->save();
-
-            return response()->json([
-                "success" => true,
-                "message" => "Post Disliked"
-            ], 204);
-
-        } catch (\Exception $e) {
-
-            return response()->json([
-                "success" => false,
-                "message" => $e->getMessage()
-            ], 500);
-
-        }
     }
 
     /**
@@ -217,25 +182,6 @@ class PostLikeController extends Controller
 
     public function like_count(Post $post): JsonResponse
     {
-        try {
-
-            $count = $post->likes()->count();
-
-            $post->save();
-
-            return response()->json([
-                "success" => true,
-                "message" => "Post liked count",
-                "data" => $count
-            ], 200);
-
-        } catch (\Exception $e) {
-
-            return response()->json([
-                "success" => false,
-                "message" => $e->getMessage()
-            ], 500);
-
-        }
+        
     }
 }

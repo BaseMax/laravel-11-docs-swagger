@@ -4,15 +4,10 @@ namespace App\Http\Controllers\Api\V1;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Http\Requests\Category\CategoryRequest;
 use App\Http\Resources\CategoryResource;
-use App\Actions\Category\GetCategoriesAction;
-use App\Actions\Category\CreateCategoryAction;
-use App\Actions\Category\UpdateCategoryAction;
-use App\Actions\Category\DeleteCategoryAction;
 
 /**
  * @group Category Management
@@ -82,11 +77,9 @@ class CategoryController extends Controller
      * )
      */
 
-    public function index(GetCategoriesAction $action): ResourceCollection
+    public function index(): ResourceCollection
     {
-        Gate::authorize("viewAny", Category::class);
 
-        return CategoryResource::collection($action->handle());
     }
 
     /**
@@ -190,25 +183,9 @@ class CategoryController extends Controller
      * )
      */
 
-    public function store(CategoryRequest $request, CreateCategoryAction $action): JsonResponse
+    public function store(CategoryRequest $request): JsonResponse
     {
-        Gate::authorize("create", Category::class);
 
-        $data = $request->validated();
-        $data['user_id'] = $request->user()->id;
-
-        if ($category = $action->handle($data))
-            return response()->json([
-                "success" => true,
-                "message" => "Category created successfullly",
-                "data" => $category
-            ], 201);
-        else
-            return response()->json([
-                "success" => false,
-                "message" => "",
-                "data" => null
-            ], 500);
     }
 
     /**
@@ -282,9 +259,7 @@ class CategoryController extends Controller
 
     public function show(Category $category): CategoryResource
     {
-        Gate::authorize("view", $category);
 
-        return new CategoryResource($category);
     }
 
     /**
@@ -412,22 +387,9 @@ class CategoryController extends Controller
      * )
      */
 
-    public function update(CategoryRequest $request, Category $category, UpdateCategoryAction $action): JsonResponse
+    public function update(CategoryRequest $request, Category $category): JsonResponse
     {
-        Gate::authorize("update", $category);
 
-        if ($category = $action->handle($category, $request->validated()))
-            return response()->json([
-                "success" => true,
-                "message" => "",
-                "data" => $category
-            ], 204);
-        else
-            return response()->json([
-                "success" => false,
-                "message" => "",
-                "data" => null
-            ], 500);
     }
 
     /**
@@ -521,18 +483,8 @@ class CategoryController extends Controller
      * )
      */
 
-    public function destroy(Category $category, DeleteCategoryAction $action): JsonResponse
+    public function destroy(Category $category): JsonResponse
     {
-        Gate::authorize("delete", $category);
 
-        if ($action->handle($category))
-            return response()->json([
-                "success" => true,
-                "message" => "Category deleted successfully"
-            ], 204);
-        else
-            return response()->json([
-                "success" => false
-            ], 500);
     }
 }

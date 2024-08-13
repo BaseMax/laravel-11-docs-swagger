@@ -9,10 +9,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Http\Requests\Comment\CommentRequest;
 use App\Http\Resources\CommentResource;
-use App\Actions\Comment\GetCommentsAction;
-use App\Actions\Comment\CreateCommentAction;
-use App\Actions\Comment\UpdateCommentAction;
-use App\Actions\Comment\DeleteCommentAction;
 
 /**
  * @group Comment Management
@@ -83,11 +79,9 @@ class CommentController extends Controller
      * )
      */
 
-    public function index(GetCommentsAction $action): ResourceCollection
+    public function index(): ResourceCollection
     {
-        Gate::authorize("viewAny", Comment::class);
 
-        return CommentResource::collection($action->handle());
     }
 
     /**
@@ -203,25 +197,9 @@ class CommentController extends Controller
      * )
      */
 
-    public function store(CommentRequest $request, CreateCommentAction $action): JsonResponse
+    public function store(CommentRequest $request): JsonResponse
     {
-        // Gate::authorize("create", Comment::class);
 
-        $data = $request->all();
-
-        if ($comment = $action->handle($data))
-            return response()->json([
-                "success" => true,
-                "message" => "Comment created successfully.",
-                "data" => new CommentResource($comment)
-            ], 201);
-        else
-            return response()->json([
-                "success" => false,
-                "message" => "Something went wrong.",
-                "data" => null,
-                "errors" => null
-            ], 500);
 
     }
 
@@ -298,9 +276,6 @@ class CommentController extends Controller
 
     public function show(Comment $comment)
     {
-        Gate::authorize("view", $comment);
-
-        return new CommentResource($comment);
     }
 
     /**
@@ -435,23 +410,9 @@ class CommentController extends Controller
      * )
      */
 
-    public function update(CommentRequest $request, Comment $comment, UpdateCommentAction $action): JsonResponse
+    public function update(CommentRequest $request, Comment $comment): JsonResponse
     {
-        Gate::authorize("update", $comment);
 
-        if ($comment = $action->handle($comment, $request->all()))
-            return response()->json([
-                "success" => true,
-                "message" => "Comment updated successfully.",
-                "data" => new CommentResource($comment)
-            ], 204);
-        else
-            return response()->json([
-                "success" => false,
-                "message" => "Something went wrong.",
-                "data" => null,
-                "errors" => null
-            ], 500);
     }
 
     /**
@@ -545,21 +506,8 @@ class CommentController extends Controller
      * )
      */
 
-    public function destroy(Comment $comment, DeleteCommentAction $action): JsonResponse
+    public function destroy(Comment $comment): JsonResponse
     {
-        Gate::authorize("delete", $comment);
-
-        if ($action->handle($comment))
-            return response()->json([
-                "success" => true,
-                "message" => "Comment deleted successfully.",
-            ], 204);
-        else
-            return response()->json([
-                "success" => false,
-                "message" => "Something went wrong.",
-                "data" => null,
-                "errors" => null
-            ], 500);
+        
     }
 }

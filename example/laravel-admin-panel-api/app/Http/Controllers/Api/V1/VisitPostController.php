@@ -83,20 +83,6 @@ class VisitPostController extends Controller
 
     public function store_visit(Request $request, Post $post): JsonResponse
     {
-        $ip = \Hash::make($request->ip());
-
-        $user_agent = $request->userAgent();
-
-        if ($post->visits()->where("visited_at", today())->where("ip_address", $ip)->count() < 1)
-            $post->visits()->create([
-                "ip_address" => $ip,
-                "user_agent" => $user_agent
-            ]);
-
-        return response()->json([
-            "success" => true,
-            "message" => "Post visited successfully!"
-        ], 201);
     }
 
     /**
@@ -154,12 +140,5 @@ class VisitPostController extends Controller
 
     public function post_visits_count(Post $post): JsonResponse
     {
-        $visits_count = $post->visits()->count();
-
-        return response()->json([
-            "success" => true,
-            "message" => "Post vists count",
-            "data" => $visits_count
-        ], 200);
     }
 }
