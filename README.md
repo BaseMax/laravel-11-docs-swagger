@@ -44,3 +44,15 @@ Run the local server with the following command
 ```shell
 $ php artisan serve
 ```
+
+Use the following command to update the Swagger document
+
+```shell
+php artisan l5-swagger:genaret
+```
+
+Use the following command to update the Scibe document
+
+```shell
+php artisan scribe:genaret
+```
